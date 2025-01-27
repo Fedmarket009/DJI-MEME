@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$Dji Crypto Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .doge-img {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+    .market-cap {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: left;
+    }
+    .result p {
+      margin: 5px 0;
+    }
+    .add-item {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #007bff;
+      cursor: pointer;
+    }
+    .add-item:hover {
+      text-decoration: underline;
+    }
+    .chart-container {
+      margin-top: 20px;
+      width: 100%;
+      height: 200px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="calculator">
+    <h1>$Dji Crypto Calculator</h1>
+    <img src="https://i.imgur.com/6sbTbbz.png" alt="Doge Meme" class="doge-img">
+    <div class="market-cap">
+      <label for="currentMarketCap">Current Market Cap (USD):</label>
+      <select id="currentMarketCap">
+        <!-- Options from 1M to 100M in 10M intervals -->
+        <option value="1000000">$1 Million</option>
+        <option value="10000000">$10 Million</option>
+        <option value="20000000">$20 Million</option>
+        <option value="30000000">$30 Million</option>
+        <option value="40000000">$40 Million</option>
+        <option value="50000000">$50 Million</option>
+        <option value="60000000">$60 Million</option>
+        <option value="70000000">$70 Million</option>
+        <option value="80000000">$80 Million</option>
+        <option value="90000000">$90 Million</option>
+        <option value="100000000">$100 Million</option>
+        <!-- Options from 100M to 1B in 50M intervals -->
+        <option value="150000000">$150 Million</option>
+        <option value="200000000">$200 Million</option>
+        <option value="250000000">$250 Million</option>
+        <option value="300000000">$300 Million</option>
+        <option value="350000000">$350 Million</option>
+        <option value="400000000">$400 Million</option>
+        <option value="450000000">$450 Million</option>
+        <option value="500000000">$500 Million</option>
+        <option value="550000000">$550 Million</option>
+        <option value="600000000">$600 Million</option>
+        <option value="650000000">$650 Million</option>
+        <option value="700000000">$700 Million</option>
+        <option value="750000000">$750 Million</option>
+        <option value="800000000">$800 Million</option>
+        <option value="850000000">$850 Million</option>
+        <option value="900000000">$900 Million</option>
+        <option value="950000000">$950 Million</option>
+        <option value="1000000000">$1 Billion</option>
+      </select>
+    </div>
+    <div id="itemInputs">
+      <div class="item">
+        <label for="itemCategory1">Category:</label>
+        <select id="itemCategory1" onchange="updateItems(1)">
+          <option value="electronics">Electronics</option>
+          <option value="furniture">Furniture</option>
+          <option value="clothing">Clothing</option>
+          <option value="vehicles">Vehicles</option>
+          <option value="books">Books</option>
+          <option value="toys">Toys</option>
+          <option value="sports">Sports Equipment</option>
+          <option value="tools">Tools</option>
+          <option value="collectibles">Collectibles</option>
+          <option value="other">Other</option>
+        </select>
+        <label for="item1">Item:</label>
+        <select id="item1">
+          <!-- Electronics items -->
+          <option value="laptop">Laptop</option>
+          <option value="phone">Phone</option>
+          <option value="tablet">Tablet</option>
+          <option value="camera">Camera</option>
+          <option value="tv">TV</option>
+        </select>
+        <label for="itemValue1">Value of Item (USD):</label>
+        <input type="number" id="itemValue1" placeholder="Enter value of item">
+      </div>
+    </div>
+    <div class="add-item" onclick="addItem()">+ Add Another Item</div>
+    <button onclick="calculate()">Calculate</button>
+    <div class="result">
+      <p id="totalValue"></p>
+      <p id="currentPrice"></p>
+      <p id="tokensReceived"></p>
+      <p id="futureValue"></p>
+    </div>
+    <div class="chart-container">
+      <canvas id="growthChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    let itemCount = 1;
+
+    // Items for each category
+    const categoryItems = {
+      electronics: [
+        { name: "Laptop", value: "laptop" },
+        { name: "Phone", value: "phone" },
+        { name: "Tablet", value: "tablet" },
+        { name: "Camera", value: "camera" },
+        { name: "TV", value: "tv" }
+      ],
+      furniture: [
+        { name: "Sofa", value: "sofa" },
+        { name: "Table", value: "table" },
+        { name: "Chair", value: "chair" },
+        { name: "Bed", value: "bed" },
+        { name: "Desk", value: "desk" }
+      ],
+      clothing: [
+        { name: "Shirt", value: "shirt" },
+        { name: "Pants", value: "pants" },
+        { name: "Shoes", value: "shoes" },
+        { name: "Jacket", value: "jacket" },
+        { name: "Dress", value: "dress" }
+      ],
+      vehicles: [
+        { name: "Car", value: "car" },
+        { name: "Bike", value: "bike" },
+        { name: "Scooter", value: "scooter" },
+        { name: "Motorcycle", value: "motorcycle" },
+        { name: "ATV", value: "atv" }
+      ],
+      books: [
+        { name: "Textbook", value: "textbook" },
+        { name: "Novel", value: "novel" },
+        { name: "Comic", value: "comic" },
+        { name: "Magazine", value: "magazine" },
+        { name: "Encyclopedia", value: "encyclopedia" }
+      ],
+      toys: [
+        { name: "Action Figure", value: "action_figure" },
+        { name: "Doll", value: "doll" },
+        { name: "Board Game", value: "board_game" },
+        { name: "LEGO Set", value: "lego_set" },
+        { name: "Puzzle", value: "puzzle" }
+      ],
+      sports: [
+        { name: "Bicycle", value: "bicycle" },
+        { name: "Treadmill", value: "treadmill" },
+        { name: "Dumbbells", value: "dumbbells" },
+        { name: "Yoga Mat", value: "yoga_mat" },
+        { name: "Tennis Racket", value: "tennis_racket" }
+      ],
+      tools: [
+        { name: "Drill", value: "drill" },
+        { name: "Wrench", value: "wrench" },
+        { name: "Saw", value: "saw" },
+        { name: "Screwdriver Set", value: "screwdriver_set" },
+        { name: "Toolbox", value: "toolbox" }
+      ],
+      collectibles: [
+        { name: "Trading Cards", value: "trading_cards" },
+        { name: "Coins", value: "coins" },
+        { name: "Stamps", value: "stamps" },
+        { name: "Action Figures", value: "action_figures" },
+        { name: "Art", value: "art" }
+      ],
+      other: [
+        { name: "Other", value: "other" }
+      ]
+    };
+
+    // Function to update items based on category
+    function updateItems(itemNumber) {
+      const category = document.getElementById(`itemCategory${itemNumber}`).value;
+      const itemSelect = document.getElementById(`item${itemNumber}`);
+      itemSelect.innerHTML = categoryItems[category]
+        .map(item => `<option value="${item.value}">${item.name}</option>`)
+        .join("");
+    }
+
+    // Function to add more item inputs
+    function addItem() {
+      itemCount++;
+      const itemInputs = document.getElementById('itemInputs');
+      const newInput = document.createElement('div');
+      newInput.classList.add('item');
+      newInput.innerHTML = `
+        <label for="itemCategory${itemCount}">Category:</label>
+        <select id="itemCategory${itemCount}" onchange="updateItems(${itemCount})">
+          <option value="electronics">Electronics</option>
+          <option value="furniture">Furniture</option>
+          <option value="clothing">Clothing</option>
+          <option value="vehicles">Vehicles</option>
+          <option value="books">Books</option>
+          <option value="toys">Toys</option>
+          <option value="sports">Sports Equipment</option>
+          <option value="tools">Tools</option>
+          <option value="collectibles">Collectibles</option>
+          <option value="other">Other</option>
+        </select>
+        <label for="item${itemCount}">Item:</label>
+        <select id="item${itemCount}">
+          ${categoryItems.electronics.map(item => `<option value="${item.value}">${item.name}</option>`).join("")}
+        </select>
+        <label for="itemValue${itemCount}">Value of Item (USD):</label>
+        <input type="number" id="itemValue${itemCount}" placeholder="Enter value of item">
+      `;
+      itemInputs.appendChild(newInput);
+    }
+
+    // Initialize Chart
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    const growthChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Future Value of $Dji',
+          data: [],
+          borderColor: '#007bff',
+          fill: false,
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Market Cap (USD)'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Value of Tokens (USD)'
+            }
+          }
+        }
+      }
+    });
+
+    // Function to calculate results
+    function calculate() {
+      // Constants
+      const currentMarketCap = parseFloat(document.getElementById('currentMarketCap').value);
+      const totalSupply = 1000000000; // 1 billion $Dji
+
+      // Calculate current price per $Dji
+      const currentPricePerDji = currentMarketCap / totalSupply;
+
+      // Get the total value of all items
+      let totalValue = 0;
+      for (let i = 1; i <= itemCount; i++) {
+        const itemValue = parseFloat(document.getElementById(`itemValue${i}`).value) || 0;
+        totalValue += itemValue;
+      }
+
+      // Display total value of all items
+      document.getElementById('totalValue').innerText = `Total Value of Items: $${totalValue.toFixed(2)}`;
+
+      // Calculate how many tokens you get for the total value
+      const tokensReceived = totalValue / currentPricePerDji;
+
+      // Display current price and tokens received
+      document.getElementById('currentPrice').innerText = `Current Price per $Dji: $${currentPricePerDji.toFixed(6)}`;
+      document.getElementById('tokensReceived').innerText = `Tokens Received: ${tokensReceived.toFixed(2)} $Dji`;
+
+      // Calculate future value at different market caps
+      const marketCaps = [100000000, 200000000, 300000000, 400000000, 500000000, 600000000, 700000000, 800000000, 900000000, 1000000000];
+      let futureValueText = "Future Value:\n";
+      const futureValues = [];
+      marketCaps.forEach((cap) => {
+        const futurePricePerDji = cap / totalSupply;
+        const futureValue = tokensReceived * futurePricePerDji;
+        futureValueText += `At $${(cap / 1000000).toFixed(0)}M Market Cap: $${futureValue.toFixed(2)}\n`;
+        futureValues.push(futureValue);
+      });
+
+      document.getElementById('futureValue').innerText = futureValueText;
+
+      // Update Chart
+      growthChart.data.labels = marketCaps.map(cap => `$${(cap / 1000000).toFixed(0)}M`);
+      growthChart.data.datasets[0].data = futureValues;
+      growthChart.update();
+    }
+  </script>
+</body>
+</html>
